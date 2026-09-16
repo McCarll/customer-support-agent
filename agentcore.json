@@ -20,13 +20,48 @@
       "authorizerType": "AWS_IAM"
     }
   ],
-  "memories": [],
+  "memories": [
+    {
+      "name": "SupportMemory",
+      "strategies": ["USER_PREFERENCE", "SEMANTIC", "SUMMARIZATION"]
+    }
+  ],
   "knowledgeBases": [],
   "credentials": [],
   "evaluators": [],
   "onlineEvalConfigs": [],
-  "agentCoreGateways": [],
-  "policyEngines": [],
+  "agentCoreGateways": [
+    {
+      "name": "CustomerSupportGateway",
+      "protocol": "MCP",
+      "authorizerType": "AWS_IAM",
+      "runtimes": ["SupportAgent"],
+      "targets": [
+        {
+          "name": "SupportTarget",
+          "type": "MCP",
+          "description": "Order, customer, and refund tools with Cedar ENFORCE"
+        }
+      ]
+    }
+  ],
+  "policyEngines": [
+    {
+      "name": "RefundPolicyEngine",
+      "attachToGateways": ["CustomerSupportGateway"],
+      "attachMode": "ENFORCE",
+      "policies": [
+        {
+          "name": "RefundLimit",
+          "source": "policy/refund.cedar"
+        },
+        {
+          "name": "ReadTools",
+          "source": "policy/read_tools.cedar"
+        }
+      ]
+    }
+  ],
   "configBundles": [],
   "abTests": [],
   "harnesses": [],

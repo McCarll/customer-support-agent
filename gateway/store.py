@@ -6,13 +6,13 @@ import json
 import os
 import sqlite3
 import threading
-import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-DB_PATH = Path(os.getenv("SUPPORT_DB", Path(__file__).resolve().parents[1] / ".local" / "support.db"))
+_DEFAULT_DB = Path(__file__).resolve().parents[1] / ".local" / "support.db"
+DB_PATH = Path(os.getenv("SUPPORT_DB", _DEFAULT_DB))
 
 _lock = threading.Lock()
 _fail_remaining = 0
@@ -186,6 +186,15 @@ def refund_customer(
 
     existing = get_refund_by_key(idempotency_key)
     if existing:
+        same_payload = (
+            float(existing["amount"]) == amount_value
+            and existing["order_id"] == order_id
+            and existing["customer_id"] == customer_id
+        )
+        if not same_payload:
+            raise InvalidToolParameters(
+                "idempotency_key was reused with a different customer, order, or amount"
+            )
         return {"replayed": True, "refund": existing}
 
     order = _fetch_order(order_id)
@@ -209,12 +218,27 @@ def refund_customer(
             "SELECT * FROM refunds WHERE idempotency_key = ?", (idempotency_key,)
         ).fetchone()
         if existing:
-            return {"replayed": True, "refund": dict(existing)}
+            existing_refund = dict(existing)
+            same_payload = (
+                float(existing_refund["amount"]) == amount_value
+                and existing_refund["order_id"] == order_id
+                and existing_refund["customer_id"] == customer_id
+            )
+            if not same_payload:
+                raise InvalidToolParameters(
+                    "idempotency_key was reused with a different customer, order, or amount"
+                )
+            return {"replayed": True, "refund": existing_refund}
         conn.execute(
             """
-            INSERT INTO refunds
-                (id, customer_id, order_id, amount, reason, idempotency_key, status, created_at)
-            VALUES (:id, :customer_id, :order_id, :amount, :reason, :idempotency_key, :status, :created_at)
+            INSERT INTO refunds (
+                id, customer_id, order_id, amount, reason,
+                idempotency_key, status, created_at
+            )
+            VALUES (
+                :id, :customer_id, :order_id, :amount, :reason,
+                :idempotency_key, :status, :created_at
+            )
             """,
             refund,
         )
@@ -232,4 +256,3 @@ def reset_for_tests(tmp_path: Path) -> None:
     if DB_PATH.exists():
         DB_PATH.unlink()
     init_db()
-    time.sleep(0)

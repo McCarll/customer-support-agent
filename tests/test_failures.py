@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from invoke import call_tool
+from gateway.invoke import call_tool
 
 
 def _spans(tmp_path: Path) -> list[dict]:
@@ -14,18 +14,21 @@ def _spans(tmp_path: Path) -> list[dict]:
 def test_invalid_parameters_are_traced(tmp_path):
     result = call_tool("get_order", order_id="")
     assert result["error"] == "invalid_parameters"
-    names = {span["name"] for span in _spans(tmp_path)}
+    names = {item["name"] for item in _spans(tmp_path)}
     assert "gateway.policy.evaluate" in names
     assert "tool.get_order" in names
+    tool_spans = [item for item in _spans(tmp_path) if item["name"] == "tool.get_order"]
+    assert tool_spans[0]["status"] == "ERROR"
 
 
-def test_timeout_failure_is_traced(tmp_path, monkeypatch):
+def test_timeout_failure_is_traced_without_retry_storm(tmp_path, monkeypatch):
     monkeypatch.setenv("FAILURE_MODE", "timeout")
     result = call_tool("get_order", order_id="123")
     assert result["ok"] is False
     assert "Timeout" in result["error"]
-    tool_spans = [span for span in _spans(tmp_path) if span["name"] == "tool.get_order"]
-    assert tool_spans
+    tool_spans = [item for item in _spans(tmp_path) if item["name"] == "tool.get_order"]
+    assert len(tool_spans) == 1
+    assert tool_spans[0]["status"] == "ERROR"
 
 
 def test_http_500_failure_is_traced(tmp_path, monkeypatch):
@@ -45,6 +48,7 @@ def test_wrong_tool_selection_is_denied_and_traced(tmp_path):
     result = call_tool("delete_account", customer_id="CUST-001")
     assert result["decision"] == "DENY"
     assert result["authorized"] is False
-    policy_spans = [span for span in _spans(tmp_path) if span["name"] == "gateway.policy.evaluate"]
+    policy_spans = [item for item in _spans(tmp_path) if item["name"] == "gateway.policy.evaluate"]
     assert policy_spans
     assert policy_spans[0]["attributes"]["decision"] == "DENY"
+    assert policy_spans[0]["status"] == "ERROR"

@@ -1,4 +1,4 @@
-"""Interactive local chat. Starts the Gateway if MCP_URL is local."""
+"""Interactive local chat. Starts the Gateway in-process."""
 
 from __future__ import annotations
 
@@ -8,27 +8,31 @@ import time
 import uuid
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 ROOT = Path(__file__).resolve().parents[1]
+load_dotenv(ROOT / ".env")
+sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "app" / "SupportAgent"))
-sys.path.insert(0, str(ROOT / "gateway"))
 
 from agent import create_agent  # noqa: E402
 from mcp_gateway import gateway_tools  # noqa: E402
 from memory import remember  # noqa: E402
-from store import init_db  # noqa: E402
+from model.load import provider_name  # noqa: E402
+
+from gateway.mcp_server import mcp  # noqa: E402
+from gateway.store import init_db  # noqa: E402
 
 
 def start_gateway() -> None:
     init_db()
-    from mcp_server import mcp
-
     mcp.run(transport="streamable-http")
 
 
 def main() -> None:
     actor_id = "customer-001"
     session_id = f"session-{uuid.uuid4().hex[:8]}"
-    print(f"actor_id={actor_id} session_id={session_id}")
+    print(f"actor_id={actor_id} session_id={session_id} model={provider_name()}")
     print("Type 'new-session' to start a fresh session (memory is kept). Ctrl-C to exit.\n")
 
     thread = threading.Thread(target=start_gateway, daemon=True)

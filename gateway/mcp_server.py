@@ -1,4 +1,7 @@
-"""MCP server that exposes business tools behind Gateway policy."""
+"""MCP server that exposes business tools behind Gateway policy.
+
+Run as a module so package imports resolve: python -m gateway.mcp_server
+"""
 
 from __future__ import annotations
 
@@ -6,8 +9,8 @@ import os
 
 from mcp.server.fastmcp import FastMCP
 
-from invoke import call_tool_json
-from store import init_db
+from .invoke import call_tool_json
+from .store import init_db
 
 HOST = os.getenv("MCP_HOST", "127.0.0.1")
 PORT = int(os.getenv("MCP_PORT", "8080"))
@@ -45,19 +48,20 @@ def refund_customer(
     customer_id: str,
     amount: float,
     order_id: str,
-    idempotency_key: str = "operation-123",
+    idempotency_key: str,
     reason: str = "",
 ) -> str:
     """Process a customer refund. Amounts above $1000 are denied by Gateway Policy.
 
     Authorization is enforced by Cedar policy at the Gateway, not by the model prompt.
-    Repeating the same idempotency_key returns the original refund instead of creating another.
+    Repeating the same idempotency_key returns the original refund.
+    The key is required; do not reuse a key across different refunds.
 
     Args:
         customer_id: Customer identifier, for example CUST-001.
         amount: Refund amount in USD.
         order_id: Order to refund.
-        idempotency_key: Caller-supplied key. Use "operation-123" for the required scenario.
+        idempotency_key: Caller-supplied unique key. Use "operation-123" for the required demo.
         reason: Optional reason for the refund.
     """
     return call_tool_json(

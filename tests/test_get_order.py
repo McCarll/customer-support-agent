@@ -1,4 +1,4 @@
-from invoke import call_tool
+from gateway.invoke import call_tool
 
 
 def test_agent_checks_delayed_order_123():

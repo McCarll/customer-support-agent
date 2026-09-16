@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "authorized": false,
+  "decision": "DENY",
+  "reason": "Cedar forbid matched (forbid-wins).",
+  "policy": "refund.cedar",
+  "tool": "refund_customer",
+  "trace_id": "9ca71b3cb8d541b29fedeacbfc8772db"
+}

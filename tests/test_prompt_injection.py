@@ -1,5 +1,5 @@
-from invoke import call_tool
-from store import refund_count
+from gateway.invoke import call_tool
+from gateway.store import refund_count
 
 
 def test_prompt_injection_cannot_bypass_gateway_policy():

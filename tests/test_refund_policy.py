@@ -1,5 +1,5 @@
-from invoke import call_tool
-from store import refund_count
+from gateway.invoke import call_tool
+from gateway.store import refund_count
 
 
 def test_refund_at_limit_is_allowed():
@@ -50,3 +50,15 @@ def test_refund_5000_is_denied():
     )
     assert result["decision"] == "DENY"
     assert refund_count() == 0
+
+
+def test_missing_idempotency_key_is_invalid():
+    result = call_tool(
+        "refund_customer",
+        customer_id="CUST-001",
+        amount=10,
+        order_id="123",
+        idempotency_key="",
+    )
+    assert result["ok"] is False
+    assert result["error"] == "invalid_parameters"

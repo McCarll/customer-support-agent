@@ -1,4 +1,8 @@
-"""Exponential backoff for retryable Gateway / backend failures."""
+"""Exponential backoff for transient backend failures.
+
+Timeouts and invalid parameters are not retried: the deadline has already
+been exceeded, and bad input will fail again.
+"""
 
 from __future__ import annotations
 
@@ -7,11 +11,11 @@ import time
 from collections.abc import Callable
 from typing import TypeVar
 
-from store import RetryableBackendError, ToolTimeoutError
+from .store import RetryableBackendError
 
 T = TypeVar("T")
 
-RETRYABLE = (RetryableBackendError, ToolTimeoutError, TimeoutError, ConnectionError)
+RETRYABLE = (RetryableBackendError, ConnectionError)
 
 
 def retry_with_backoff(

@@ -15,3 +15,8 @@ def test_preference_survives_a_new_session():
 def test_preferences_are_scoped_to_actor():
     remember("customer-001", "s1", "My preferred AWS region is eu-west-1.")
     assert recall("customer-002", "s2") == []
+
+
+def test_unstructured_text_is_not_stored_as_a_preference():
+    remember("customer-001", "s1", "I prefer to speak with a human.")
+    assert recall("customer-001", "s2") == []

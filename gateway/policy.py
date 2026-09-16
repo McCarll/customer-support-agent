@@ -1,12 +1,17 @@
-"""Cedar-inspired policy engine used by the local Gateway.
+"""Local Cedar approximation used by the FastMCP Gateway.
 
-Production uses AgentCore Policy attached to the Gateway in ENFORCE mode.
-This evaluator reads the same Cedar files so local tests and AWS enforce
-the same rules: refund <= 1000 ALLOW, refund > 1000 DENY, default deny.
+Production uses AgentCore Policy in ENFORCE mode. This evaluator reads the
+same Cedar files so local tests exercise the same refund limit. It is not a
+full Cedar engine: it understands permit/forbid, named actions, and
+context.input.amount comparisons.
+
+Set AGENTCORE_POLICY_ENFORCE=1 to skip local evaluation when AWS Policy is
+already attached to the Gateway.
 """
 
 from __future__ import annotations
 
+import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -114,6 +119,14 @@ def evaluate(
     policy_dir: Path | None = None,
 ) -> PolicyDecision:
     """Default-deny, forbid-wins — the same semantics as AgentCore Policy."""
+    if os.getenv("AGENTCORE_POLICY_ENFORCE") == "1":
+        return PolicyDecision(
+            decision="ALLOW",
+            matched_rule=None,
+            reason="Local evaluator skipped; AgentCore Policy ENFORCE is attached.",
+            tool_name=short_action_name(tool_name),
+            arguments=arguments,
+        )
     tool = short_action_name(tool_name)
     matching_forbid: PolicyRule | None = None
     matching_permit: PolicyRule | None = None

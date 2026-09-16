@@ -1,12 +1,11 @@
-"""Strands agent factory. Tools come from the Gateway over MCP, not from local @tool defs."""
+"""Strands agent factory. Tools come from the Gateway over MCP."""
 
 from __future__ import annotations
-
-from strands import Agent
 
 from identity import identity_context
 from memory import get_session_manager, memory_prompt_block
 from model.load import load_model
+from strands import Agent
 
 SYSTEM_PROMPT = """You are a production customer support agent for an e-commerce company.
 
@@ -15,8 +14,9 @@ Use Gateway MCP tools for facts. Never invent order, customer, or refund data.
 Tool selection:
 - get_order: order status, delays, shipping. Example: "Why is my order 123 delayed?"
 - get_customer: profile and account information.
-- refund_customer: refunds. Always pass customer_id, order_id, amount, and idempotency_key.
-  For the standard refund scenario use idempotency_key="operation-123".
+- refund_customer: refunds. Always pass customer_id, order_id, amount, and a unique
+  idempotency_key. For the required demo refund use idempotency_key="operation-123".
+  Never omit idempotency_key and never reuse it for a different refund.
 
 Authorization is enforced by AgentCore Gateway Policy (Cedar), not by this prompt.
 If a tool returns decision=DENY, tell the customer the refund was refused by policy
@@ -37,8 +37,7 @@ def build_system_prompt(actor_id: str) -> str:
     ctx = identity_context(actor_id)
     return (
         f"{SYSTEM_PROMPT}\n\n"
-        f"Identity: actor={ctx.actor_id}, region={ctx.region}, "
-        f"credentials={ctx.credential_source}.\n"
+        f"Actor={ctx.actor_id}, region={ctx.region}.\n"
         f"{memory_prompt_block(actor_id)}\n"
     )
 

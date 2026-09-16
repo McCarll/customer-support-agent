@@ -1,7 +1,8 @@
-"""Memory that persists user preferences across sessions.
+"""Memory across sessions.
 
-Locally this is a JSON file keyed by actor_id (not session_id).
-In AWS, AgentCore Memory with USER_PREFERENCE is used when MEMORY_ID is set.
+Locally: JSON file keyed by actor_id (not session_id).
+On AgentCore: AgentCoreMemorySessionManager with USER_PREFERENCE when
+AGENTCORE_MEMORY_ID is set. Local file writes are skipped in that mode.
 """
 
 from __future__ import annotations
@@ -20,6 +21,10 @@ PREF_RE = re.compile(
 LOCAL_MEMORY_PATH = Path(os.getenv("MEMORY_PATH", ".local/memory.json"))
 
 
+def use_agentcore_memory() -> bool:
+    return bool(os.getenv("AGENTCORE_MEMORY_ID"))
+
+
 def _load() -> dict[str, Any]:
     if not LOCAL_MEMORY_PATH.exists():
         return {"actors": {}}
@@ -32,13 +37,15 @@ def _save(payload: dict[str, Any]) -> None:
 
 
 def extract_preferences(text: str) -> list[str]:
-    found = [f"My preferred AWS region is {match.group(1).lower()}." for match in PREF_RE.finditer(text)]
-    if "preferred" in text.lower() and not found:
-        found.append(text.strip())
-    return found
+    return [
+        f"My preferred AWS region is {match.group(1).lower()}."
+        for match in PREF_RE.finditer(text)
+    ]
 
 
 def remember(actor_id: str, session_id: str, text: str) -> list[str]:
+    if use_agentcore_memory():
+        return []
     prefs = extract_preferences(text)
     if not prefs:
         return []
@@ -56,11 +63,15 @@ def remember(actor_id: str, session_id: str, text: str) -> list[str]:
 def recall(actor_id: str, session_id: str | None = None) -> list[str]:
     """Return preferences for the actor. Session id is ignored for long-term memory."""
     del session_id
+    if use_agentcore_memory():
+        return []
     actor = _load().get("actors", {}).get(actor_id) or {}
     return list(actor.get("preferences", []))
 
 
 def memory_prompt_block(actor_id: str) -> str:
+    if use_agentcore_memory():
+        return "Long-term preferences are loaded from AgentCore Memory USER_PREFERENCE."
     prefs = recall(actor_id)
     if not prefs:
         return "No stored user preferences."
@@ -68,7 +79,7 @@ def memory_prompt_block(actor_id: str) -> str:
 
 
 def get_session_manager(session_id: str, actor_id: str):
-    """Use AgentCore Memory in AWS; return None locally so the file backend is used."""
+    """AgentCore Memory session manager, or None for the local file backend."""
     memory_id = os.getenv("AGENTCORE_MEMORY_ID")
     if not memory_id:
         return None

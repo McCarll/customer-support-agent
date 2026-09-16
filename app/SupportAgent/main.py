@@ -3,13 +3,21 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
-from bedrock_agentcore.runtime import BedrockAgentCoreApp
+from dotenv import load_dotenv
 
-from agent import create_agent
-from identity import identity_context
-from mcp_gateway import gateway_tools
-from memory import remember
+_HERE = Path(__file__).resolve().parent
+for _env in (_HERE / ".env", _HERE.parent.parent / ".env"):
+    if _env.exists():
+        load_dotenv(_env)
+        break
+
+from agent import create_agent  # noqa: E402
+from bedrock_agentcore.runtime import BedrockAgentCoreApp  # noqa: E402
+from identity import identity_context  # noqa: E402
+from mcp_gateway import gateway_tools  # noqa: E402
+from memory import remember  # noqa: E402
 
 app = BedrockAgentCoreApp()
 log = app.logger
@@ -48,11 +56,22 @@ def invoke(payload, context):
     if stored:
         log.info("stored preferences %s", stored)
 
-    with gateway_tools() as (_client, tools):
-        agent = create_agent(tools, session_id=session_id, actor_id=actor_id)
-        result = agent(prompt)
+    try:
+        with gateway_tools() as (_client, tools):
+            agent = create_agent(tools, session_id=session_id, actor_id=actor_id)
+            result = agent(prompt)
+            return {
+                "ok": True,
+                "result": str(result),
+                "actor_id": actor_id,
+                "session_id": session_id,
+            }
+    except Exception as exc:
+        log.exception("invoke failed")
         return {
-            "result": str(result),
+            "ok": False,
+            "error": type(exc).__name__,
+            "message": str(exc),
             "actor_id": actor_id,
             "session_id": session_id,
         }

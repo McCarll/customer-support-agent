@@ -17,8 +17,5 @@ agentcore/.env.local
 agentcore/aws-targets.json
 agentcore/cdk/node_modules/
 agentcore/cdk/cdk.out/
-evidence/captured/
-!evidence/expected/
-*.log
 .idea/
 .vscode/

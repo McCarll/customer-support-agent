@@ -2,22 +2,20 @@
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "ExecuteMcpTarget",
+      "Sid": "InvokeMcpTarget",
       "Effect": "Allow",
-      "Action": [
-        "bedrock-agentcore:InvokeGateway",
-        "lambda:InvokeFunction"
-      ],
-      "Resource": [
-        "arn:aws:bedrock-agentcore:*:*:gateway/*",
-        "arn:aws:lambda:*:*:function:customer-support-*"
-      ]
+      "Action": ["lambda:InvokeFunction"],
+      "Resource": "arn:aws:lambda:eu-west-1:*:function:customer-support-mcp-target"
     },
     {
-      "Sid": "EvaluatePolicy",
+      "Sid": "WriteGatewayLogs",
       "Effect": "Allow",
-      "Action": ["bedrock-agentcore:EvaluatePolicy"],
-      "Resource": "arn:aws:bedrock-agentcore:*:*:policy-engine/*"
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:eu-west-1:*:log-group:/aws/bedrock-agentcore/*"
     }
   ]
 }

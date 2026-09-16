@@ -5,10 +5,13 @@
       "Sid": "InvokeConfiguredBedrockModel",
       "Effect": "Allow",
       "Action": ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
-      "Resource": "arn:aws:bedrock:*:*:inference-profile/*"
+      "Resource": [
+        "arn:aws:bedrock:eu-west-1::foundation-model/*",
+        "arn:aws:bedrock:eu-west-1:*:inference-profile/*"
+      ]
     },
     {
-      "Sid": "UseAgentCoreMemory",
+      "Sid": "UseNamedAgentCoreMemory",
       "Effect": "Allow",
       "Action": [
         "bedrock-agentcore:CreateEvent",
@@ -17,23 +20,23 @@
         "bedrock-agentcore:RetrieveMemoryRecords",
         "bedrock-agentcore:ListMemoryRecords"
       ],
-      "Resource": "arn:aws:bedrock-agentcore:*:*:memory/*"
+      "Resource": "arn:aws:bedrock-agentcore:eu-west-1:*:memory/SupportMemory*"
     },
     {
-      "Sid": "InvokeGateway",
+      "Sid": "InvokeNamedGateway",
       "Effect": "Allow",
       "Action": ["bedrock-agentcore:InvokeGateway"],
-      "Resource": "arn:aws:bedrock-agentcore:*:*:gateway/*"
+      "Resource": "arn:aws:bedrock-agentcore:eu-west-1:*:gateway/CustomerSupportGateway*"
     },
     {
-      "Sid": "WriteOwnLogs",
+      "Sid": "WriteOwnLogsAndTraces",
       "Effect": "Allow",
       "Action": [
         "logs:CreateLogGroup",
         "logs:CreateLogStream",
         "logs:PutLogEvents"
       ],
-      "Resource": "arn:aws:logs:*:*:log-group:/aws/bedrock-agentcore/*"
+      "Resource": "arn:aws:logs:eu-west-1:*:log-group:/aws/bedrock-agentcore/*"
     }
   ]
 }

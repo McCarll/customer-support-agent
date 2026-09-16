@@ -1,4 +1,4 @@
-from policy import evaluate, load_policies
+from gateway.policy import evaluate, load_policies
 
 
 def test_cedar_files_are_the_source_of_policy():
