@@ -1,0 +1,23 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ExecuteMcpTarget",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock-agentcore:InvokeGateway",
+        "lambda:InvokeFunction"
+      ],
+      "Resource": [
+        "arn:aws:bedrock-agentcore:*:*:gateway/*",
+        "arn:aws:lambda:*:*:function:customer-support-*"
+      ]
+    },
+    {
+      "Sid": "EvaluatePolicy",
+      "Effect": "Allow",
+      "Action": ["bedrock-agentcore:EvaluatePolicy"],
+      "Resource": "arn:aws:bedrock-agentcore:*:*:policy-engine/*"
+    }
+  ]
+}

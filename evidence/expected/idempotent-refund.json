@@ -1,0 +1,10 @@
+{
+  "description": "Expected span shape for a refund replay. One refund row, replayed=true.",
+  "name": "tool.refund_customer",
+  "status": "OK",
+  "attributes": {
+    "tool": "refund_customer",
+    "idempotency_key": "operation-123",
+    "replayed": true
+  }
+}

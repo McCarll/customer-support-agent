@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "production-like-customer-support"
+version = "1.0.0"
+description = "Production-like customer support agent on AgentCore Runtime, Gateway, Memory, and Policy"
+requires-python = ">=3.10"
+dependencies = [
+    "aws-opentelemetry-distro~=0.18.0",
+    "bedrock-agentcore>=1.9.1",
+    "botocore[crt]>=1.35.0",
+    "mcp~=1.24.0",
+    "strands-agents>=1.15.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["gateway", "app"]
+
+[tool.pytest.ini_options]
+pythonpath = [".", "app/SupportAgent", "gateway"]
+testpaths = ["tests"]
+addopts = "-q"

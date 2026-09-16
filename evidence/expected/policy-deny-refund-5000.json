@@ -1,0 +1,11 @@
+{
+  "description": "Expected span shape for a policy DENY. Replace with a live capture after you run scripts/run_scenarios.py.",
+  "name": "gateway.policy.evaluate",
+  "status": "ERROR",
+  "attributes": {
+    "tool": "refund_customer",
+    "decision": "DENY",
+    "arguments": {"amount": 5000, "idempotency_key": "prompt-injection"}
+  },
+  "error": "Cedar forbid matched (forbid-wins)."
+}

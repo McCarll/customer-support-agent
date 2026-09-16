@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schema.agentcore.aws.dev/v1/agentcore.json",
+  "name": "CustomerSupportAgent",
+  "version": 1,
+  "managedBy": "CDK",
+  "tags": {
+    "agentcore:created-by": "agentcore-cli",
+    "agentcore:project-name": "CustomerSupportAgent",
+    "environment": "production-like"
+  },
+  "runtimes": [
+    {
+      "name": "SupportAgent",
+      "build": "CodeZip",
+      "entrypoint": "main.py",
+      "codeLocation": "app/SupportAgent",
+      "runtimeVersion": "PYTHON_3_13",
+      "networkMode": "PUBLIC",
+      "protocol": "HTTP",
+      "authorizerType": "AWS_IAM"
+    }
+  ],
+  "memories": [],
+  "knowledgeBases": [],
+  "credentials": [],
+  "evaluators": [],
+  "onlineEvalConfigs": [],
+  "agentCoreGateways": [],
+  "policyEngines": [],
+  "configBundles": [],
+  "abTests": [],
+  "harnesses": [],
+  "datasets": [],
+  "payments": []
+}
