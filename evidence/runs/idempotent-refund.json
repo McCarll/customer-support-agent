@@ -2,17 +2,17 @@
   "ok": true,
   "authorized": true,
   "decision": "ALLOW",
-  "trace_id": "24d2268c8a6e4cb6ac0f22d21f34f247",
+  "trace_id": "aab725e050914c39b92da0946fd9c2e9",
   "replayed": true,
   "refund": {
-    "id": "REF-563d77f1",
+    "id": "REF-0e11c777",
     "customer_id": "CUST-001",
     "order_id": "123",
     "amount": 249.99,
     "reason": "delayed shipment",
     "idempotency_key": "operation-123",
     "status": "processed",
-    "created_at": "2026-09-16T16:47:59.841848+00:00"
+    "created_at": "2026-09-21T09:36:27.467995+00:00"
   },
   "refund_count": 1
 }

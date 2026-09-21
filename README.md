@@ -6,6 +6,20 @@ denied by Cedar policy at the Gateway, not by the prompt.
 
 Diagram: [ARCHITECTURE.md](ARCHITECTURE.md) and [docs/architecture.svg](docs/architecture.svg).
 Evidence of required scenarios: [evidence/runs](evidence/runs).
+For the required technical presentation, use the
+[five-minute walkthrough](docs/presentation.md).
+
+## Requirement coverage
+
+| Requirement | Project evidence |
+| --- | --- |
+| End-to-end architecture and trade-offs | `ARCHITECTURE.md`, `docs/architecture.svg`, `docs/presentation.md` |
+| Runtime and Strands support agent | `app/SupportAgent/main.py`, `app/SupportAgent/agent.py` |
+| Multiple Gateway MCP tools | `gateway/mcp_server.py` |
+| Persistent memory and identity | `app/SupportAgent/memory.py`, `app/SupportAgent/identity.py`, `infra/iam/` |
+| Authorization and prompt-injection resistance | `policy/*.cedar`, `tests/test_prompt_injection.py` |
+| Errors, retries, idempotency, observability | `gateway/retries.py`, `gateway/observability.py`, `evidence/runs/` |
+| Required runnable scenarios | `scripts/run_scenarios.py`, `tests/` |
 
 ## How to run
 
