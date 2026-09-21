@@ -3,7 +3,7 @@
     "ok": true,
     "authorized": true,
     "decision": "ALLOW",
-    "trace_id": "3029f01a126b42abb2090e4863c3e05b",
+    "trace_id": "67f67eca06fc4df9a7f89dec339aef90",
     "found": true,
     "order": {
       "id": "123",
@@ -18,7 +18,7 @@
     "ok": true,
     "authorized": true,
     "decision": "ALLOW",
-    "trace_id": "11798d491c624a038f57d7b22789c8f4",
+    "trace_id": "a0e25ec6b52b475f9f1b6594965c36f9",
     "found": true,
     "customer": {
       "id": "CUST-001",
@@ -32,34 +32,34 @@
     "ok": true,
     "authorized": true,
     "decision": "ALLOW",
-    "trace_id": "b450b2dd6d5e4503bbcff8682755a3c1",
+    "trace_id": "8512ba83054648408bb209d60360c8d2",
     "replayed": false,
     "refund": {
-      "id": "REF-0e11c777",
+      "id": "REF-ccf0d19c",
       "customer_id": "CUST-001",
       "order_id": "123",
       "amount": 249.99,
       "reason": "delayed shipment",
       "idempotency_key": "operation-123",
       "status": "processed",
-      "created_at": "2026-09-21T09:36:27.467995+00:00"
+      "created_at": "2026-09-21T09:49:59.503429+00:00"
     }
   },
   "refund_replay": {
     "ok": true,
     "authorized": true,
     "decision": "ALLOW",
-    "trace_id": "aab725e050914c39b92da0946fd9c2e9",
+    "trace_id": "09a07f91aedb45c19d043c42537318de",
     "replayed": true,
     "refund": {
-      "id": "REF-0e11c777",
+      "id": "REF-ccf0d19c",
       "customer_id": "CUST-001",
       "order_id": "123",
       "amount": 249.99,
       "reason": "delayed shipment",
       "idempotency_key": "operation-123",
       "status": "processed",
-      "created_at": "2026-09-21T09:36:27.467995+00:00"
+      "created_at": "2026-09-21T09:49:59.503429+00:00"
     },
     "refund_count": 1
   },
@@ -70,7 +70,7 @@
     "reason": "Cedar forbid matched (forbid-wins).",
     "policy": "refund.cedar",
     "tool": "refund_customer",
-    "trace_id": "f9c8631d4943480da1dab53747fd101a"
+    "trace_id": "eb2057f9d8b645c5b040c53f6cea2265"
   },
   "memory_session_b": {
     "session_b_preferences": [
@@ -81,17 +81,17 @@
     "ok": true,
     "authorized": true,
     "decision": "ALLOW",
-    "trace_id": "f96ba63a381b4cc5a0d4536f15d1e2d1",
+    "trace_id": "7a1962a714634592989272b77adcfad7",
     "replayed": false,
     "refund": {
-      "id": "REF-799522cb",
+      "id": "REF-288b3221",
       "customer_id": "CUST-002",
       "order_id": "456",
       "amount": 54.99,
       "reason": "flaky backend",
       "idempotency_key": "retry-backoff-456",
       "status": "processed",
-      "created_at": "2026-09-21T09:36:27.611494+00:00"
+      "created_at": "2026-09-21T09:49:59.647955+00:00"
     }
   },
   "failure_timeout": {
@@ -99,20 +99,29 @@
     "error": "ToolTimeoutError",
     "message": "get_order exceeded the Gateway timeout",
     "tool": "get_order",
-    "trace_id": "2ea3da4ba8e04b7589606831dfb13200"
+    "trace_id": "d797cd62caff43589c9d62e1ff7a15a1"
   },
   "failure_invalid_params": {
     "ok": false,
     "error": "invalid_parameters",
     "message": "order_id is required",
     "tool": "get_order",
-    "trace_id": "49169fc5578344d48ceb161513c42a6f"
+    "trace_id": "9a9d5e33bc5c40ebad34ae70b0fda153"
   },
   "failure_http_500": {
     "ok": false,
     "error": "RetryableBackendError",
     "message": "HTTP 500 from refund backend",
     "tool": "refund_customer",
-    "trace_id": "238331006fd34efca15d80fcb68fb83b"
+    "trace_id": "6b4b3915d6584a60a29ee8fcbfb8ae9e"
+  },
+  "failure_llm_loop": {
+    "ok": true,
+    "trace_id": "85b7f65374a14527a53df88a6f15a64e",
+    "first_failure_stopped": false,
+    "second_identical_failure_stopped": true,
+    "next_identical_call_blocked": true,
+    "root_cause": "Repeated get_order ToolTimeoutError",
+    "message": "stopped after 2 identical get_order failures (ToolTimeoutError)"
   }
 }
