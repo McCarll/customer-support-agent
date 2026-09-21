@@ -14,3 +14,10 @@ def test_loop_guard_resets_on_success():
     guard.record_failure("get_order", "Timeout")
     guard.record_success()
     assert guard.record_failure("get_order", "Timeout") is False
+
+
+def test_loop_guard_records_a_root_cause_for_trace_evidence():
+    guard = LoopGuard(max_identical_failures=2)
+    guard.record_failure("get_order", "ToolTimeoutError")
+    assert guard.record_failure("get_order", "ToolTimeoutError") is True
+    assert guard.reason == "stopped after 2 identical get_order failures (ToolTimeoutError)"

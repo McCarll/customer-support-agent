@@ -13,7 +13,7 @@ Handled tool failures set span `status=ERROR`.
 | Invalid parameters | `tool.get_order` `invalid_parameters` | Empty or mismatched ids |
 | Wrong tool | `gateway.policy.evaluate` DENY | Default deny / no Cedar permit |
 | HTTP 500 | `tool.refund_customer` RetryableBackendError | Refund backend 500; exponential backoff |
-| LLM loop | identical tool failure twice | `LoopGuard` stops a third identical call |
+| LLM loop | `agent.loop_guard` status=ERROR | Two identical `get_order` timeout failures; `blocked_next_call=true` stops the next call |
 
 ```sql
 fields @timestamp, name, status, error, attributes.tool

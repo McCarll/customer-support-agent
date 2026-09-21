@@ -18,8 +18,10 @@ os.environ.setdefault("SUPPORT_DB", str(ROOT / ".local" / "scenario.db"))
 os.environ["FAILURE_MODE"] = "none"
 
 from memory import recall, remember  # noqa: E402
+from loop_guard import LoopGuard  # noqa: E402
 
 from gateway.invoke import call_tool  # noqa: E402
+from gateway.observability import emit_span, new_trace_id  # noqa: E402
 from gateway.store import configure_failures, init_db, refund_count  # noqa: E402
 
 
@@ -27,6 +29,41 @@ def show(title: str, payload: dict) -> dict:
     print(f"\n=== {title} ===")
     print(json.dumps(payload, indent=2, default=str))
     return payload
+
+
+def prove_loop_guard() -> dict:
+    """Record the bounded repeated-failure behavior used by the agent runtime.
+
+    A model that repeats the same failed tool request must be stopped before a
+    third call. The emitted ERROR span is the trace evidence for this failure
+    mode; its error field identifies the root cause and stopping decision.
+    """
+    guard = LoopGuard(max_identical_failures=2)
+    trace_id = new_trace_id()
+    first_stops = guard.record_failure("get_order", "ToolTimeoutError")
+    second_stops = guard.record_failure("get_order", "ToolTimeoutError")
+    emit_span(
+        "agent.loop_guard",
+        trace_id=trace_id,
+        status="ERROR" if guard.stopped else "OK",
+        attributes={
+            "tool": "get_order",
+            "error_type": "ToolTimeoutError",
+            "failure_count": 2,
+            "max_identical_failures": guard.max_identical_failures,
+            "blocked_next_call": guard.stopped,
+        },
+        error=guard.reason or None,
+    )
+    return {
+        "ok": guard.stopped,
+        "trace_id": trace_id,
+        "first_failure_stopped": first_stops,
+        "second_identical_failure_stopped": second_stops,
+        "next_identical_call_blocked": guard.stopped,
+        "root_cause": "Repeated get_order ToolTimeoutError",
+        "message": guard.reason,
+    }
 
 
 def main() -> None:
@@ -120,6 +157,9 @@ def main() -> None:
         ),
     )
     os.environ["FAILURE_MODE"] = "none"
+    scenarios["failure_llm_loop"] = show(
+        "11. Failure: repeated tool-call loop stopped", prove_loop_guard()
+    )
 
     (EVIDENCE / "scenarios.json").write_text(
         json.dumps(scenarios, indent=2, default=str),
